@@ -1,6 +1,6 @@
 import sys, argparse
 import logging, logging.handlers
-from urllib.request import urlopen
+import urllib.request as request
 import csv
 from datetime import *
 
@@ -13,11 +13,8 @@ logger.addHandler(file_handler)
 
 
 def downloadData(url):
-    response = urlopen(url).read().decode('utf-8')
-    file_name = 'data.csv'
-    open(file_name, 'wb').write(response.encode('utf-8'))
-    return file_name
-
+    response = request.urlopen(url)
+    return response.read().decode('utf-8').splitlines()
 
 def processData(data):
     global logger
@@ -44,8 +41,7 @@ def main(url):
     except Exception as e:
         print ("Exception occured: ", e)
         sys.exit()
-    data = open(csvData)
-    personData = processData(data)
+    personData = processData(csvData)
 
     getID = input('what id shall I lookup for you? (0, or less to quit) ')
     while getID.isdigit():
@@ -59,8 +55,12 @@ def main(url):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url",dest="url",nargs=1, help='URL Required. Usage: python IS211_Week2_assignment.py --url URL_FOR_DATA')
+    parser.add_argument('--url',help='URL Required. Usage: python IS211_Week2_assignment.py --url URL_FOR_DATA')
     args = parser.parse_args()
-    url=args.url[0]
-    if url.find('http://') < 0: url = 'http://' + url
-    main(url)
+    
+    if args.url:
+        url=args.url
+        #if url.find('http://') < 0: url = 'http://' + url
+        main(url)
+    else:
+        print ('URL Required. Usage: python IS211_Week2_assignment.py --url URL_FOR_DATA')
